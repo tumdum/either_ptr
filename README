@@ -4,3 +4,5 @@ in few ways:
 - it allows for A to be the same type as B
 - it can only store types with alignment of at least 2. To be precise it
   requires passed pointer to have lowest bit set to zero.
+
+To use it's enough to copy either_ptr.hpp and LICENSE files to your project.
