@@ -1,0 +1,6 @@
+either_ptr<A,B> is type similar to boost::variant<A*,B*> in concept. It differs
+in few ways:
+- it is always the same size as void*
+- it allows for A to be the same type as B
+- it can only store types with alignment of at least 2. To be precise it
+  requires passed pointer to have lowest bit set to zero.
