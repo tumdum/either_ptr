@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cassert>
+#include <type_traits>
 
 namespace tmd
 {
@@ -39,6 +40,10 @@ struct either_ptr
     template<typename F>
     auto visit(const F& f) const -> decltype(f.left(static_cast<L*>(nullptr)))
     {
+        using LR = decltype(f.left(static_cast<L*>(nullptr)));
+        using RR = decltype(f.right(static_cast<R*>(nullptr)));
+        static_assert(std::is_same<LR, RR>::value, "left and right have to return same type");
+
         if (isLeft())
         {
             return f.left(reinterpret_cast<Left*>(m_data.num));

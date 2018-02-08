@@ -15,14 +15,6 @@ struct StdStringer
     std::string right(const std::string* p) const { return *p; }
 };
 
-struct Extractor
-{
-    template <typename T>
-    T left(const T* p) const { return *p; }
-    template <typename T>
-    T right(const T* p) const { return *p; }
-};
-
 template <int M>
 struct Mult
 {
@@ -48,18 +40,18 @@ T to(const int i) { return i; }
 template <>
 std::string to<std::string>(const int i) { return std::to_string(i); }
 
-template <typename T>
+template <typename L, typename R>
 void test()
 {
-    using TPtr = tmd::either_ptr<T, T, RightHeapDeleter>;
-    static_assert(sizeof(TPtr) == sizeof(T*), "");
-    T i = to<T>(10);
-    T* p = new T{to<T>(42)};
+    using TPtr = tmd::either_ptr<L, R, RightHeapDeleter>;
+    static_assert(sizeof(TPtr) == sizeof(void*), "");
+    L i = to<L>(10);
+    R* p = new R{to<R>(42)};
     const auto s1 = TPtr::left(&i);
     const auto s2 = TPtr::right(p);
 
-    assert(i == s1.visit(Extractor{}));
-    assert(*p == s2.visit(Extractor{}));
+    assert(StdStringer{}.left(&i) == s1.visit(StdStringer{}));
+    assert(StdStringer{}.right(p) == s2.visit(StdStringer{}));
 
     std::cout << "s1: " << s1.visit(StdStringer{}) << std::endl;
     std::cout << "s2: " << s2.visit(StdStringer{}) << std::endl;
@@ -67,16 +59,19 @@ void test()
     s1.visit(Mult<10>{});
     s2.visit(Mult<10>{});
 
-    assert(i == s1.visit(Extractor{}));
-    assert(*p == s2.visit(Extractor{}));
+    assert(StdStringer{}.left(&i) == s1.visit(StdStringer{}));
+    assert(StdStringer{}.right(p) == s2.visit(StdStringer{}));
 
     std::cout << "s1: " << s1.visit(StdStringer{}) << std::endl;
     std::cout << "s2: " << s2.visit(StdStringer{}) << std::endl;
 }
 
 int main() {
-    test<short>();
-    test<int>();
-    test<double>();
-    test<std::string>();
+    test<short, short>();
+    test<int, int>();
+    test<double, double>();
+    test<std::string, std::string>();
+
+    test<std::string, int>();
+    test<int, std::string>();
 }
